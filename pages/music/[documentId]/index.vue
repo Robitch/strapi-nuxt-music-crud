@@ -135,6 +135,12 @@
       </div>
     </div>
 
+    <MusicfyPlayer
+      class="mt-20"
+      v-if="currentMusic?.musicUrl"
+      :config="music_config"
+    />
+
     <!-- Delete Confirmation Modal -->
     <DeleteConfirmModal
       v-model="showDeleteModal"
@@ -164,6 +170,24 @@ const showDeleteModal = ref(false);
 const coverImageUrl = computed(() => {
   return `${config.public.apiBase}${currentMusic.value?.coverImage?.url}`;
 });
+const music_config = computed(() =>
+  useMusicfyPlayer({
+    audio: {
+      src: currentMusic.value?.musicUrl?.url
+        ? `${config.public.apiBase}${currentMusic.value.musicUrl.url}`
+        : "",
+    },
+    image: {
+      src: currentMusic.value?.coverImage?.url
+        ? `${config.public.apiBase}${currentMusic.value.coverImage.url}`
+        : "",
+      alt: currentMusic.value?.title || "Music Cover",
+    },
+    color: {
+      detect: true,
+    },
+  })
+);
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -198,3 +222,18 @@ onBeforeUnmount(() => {
   resetCurrentMusic();
 });
 </script>
+
+<style>
+.musicfyplayer {
+  height: auto !important;
+  background-color: rgb(79 70 229 / var(--tw-bg-opacity, 1)) !important;
+}
+
+.musicfyplayer .mp__box {
+  background: inherit !important;
+}
+
+.musicfyplayer .mp__cover {
+  display: none !important;
+}
+</style>

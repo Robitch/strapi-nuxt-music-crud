@@ -7,6 +7,7 @@ export interface Music {
   genre: string
   year: number
   coverImage: CoverImage | null
+  musicUrl: MusicUrl | null
   createdAt: string
   updatedAt: string
 }
@@ -15,6 +16,12 @@ export interface CoverImage {
   id: number,
   documentId: number,
   url: string,
+}
+
+export interface MusicUrl {
+  id: number
+  documentId: number
+  url: string
 }
 
 export interface ImageFormat {
@@ -36,6 +43,7 @@ export interface MusicCreatePayload {
   genre: string
   year: string
   coverImage?: File | null
+  musicUrl?: File | null
 }
 
 export interface MusicUpdatePayload {
@@ -45,6 +53,7 @@ export interface MusicUpdatePayload {
   genre?: string
   year?: number
   coverImage?: File | null
+  musicUrl?: File | null
 }
 
 export interface PaginationMeta {

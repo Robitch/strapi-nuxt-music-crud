@@ -49,8 +49,9 @@ export const useApi = () => {
     try {
       const response = await api.get(`/musics/${documentId}`, {
         params: {
-          'populate[coverImage][fields][1]': 'url'
-        }
+          'populate[coverImage][fields][1]': 'url',
+          'populate[musicUrl][fields][1]': 'url',
+        },
       })
       return response.data?.data
     } catch (err: any) {
@@ -94,22 +95,21 @@ export const useApi = () => {
         await api.post('/upload', formData)
       }
 
-      return createRes.data?.data
 
       // 3. Upload Music File
-      // if (musicFile) {
-      //   const formData = new FormData()
-      //   formData.append('files', musicFile)
-      //   formData.append('ref', 'api::music.music')
-      //   formData.append('refId', musicId.toString())
-      //   formData.append('field', 'music_url') // nom du champ dans le model
+      if (musicData.musicUrl) {
+        console.log('Uploading music file:', musicData.musicUrl)
+        const musicBuffer = await musicData.musicUrl.arrayBuffer()
+        const formData = new FormData()
+        formData.append('files', new Blob([musicBuffer], { type: musicData.musicUrl.type }), musicData.musicUrl.name)
+        formData.append('ref', 'api::music.music') // UID du model
+        formData.append('refId', musicId.toString())
+        formData.append('field', 'musicUrl') // nom du champ dans le model
 
-      //   await api.post('/upload', formData)
-      // }
+        await api.post('/upload', formData)
+      }
 
-      // 4. Re-fetch musique complète (avec populate)
-      // const finalRes = await api.get(`/musics/${musicId}?populate=*`)
-      // return finalRes.data?.data
+      return createRes.data?.data
     } catch (err: any) {
       console.error(err)
       error.value = err.response?.data?.error || {
@@ -130,7 +130,7 @@ export const useApi = () => {
     const error = ref(null);
 
     try {
-      const { coverImage, ...fields } = musicData;
+      const { coverImage, musicUrl, ...fields } = musicData;
 
       // 1. Mettre à jour les champs textuels
       const updateRes = await api.put(`/musics/${documentId}`, {
@@ -154,10 +154,20 @@ export const useApi = () => {
         await api.post('/upload', formData);
       }
 
+      // 3. Upload nouvelle musique si fournie
+      if (musicUrl) {
+        const musicBuffer = await musicUrl.arrayBuffer();
+        const formData = new FormData();
+        formData.append('files', new Blob([musicBuffer], { type: musicUrl.type }), musicUrl.name);
+        formData.append('ref', 'api::music.music');
+        formData.append('refId', musicId.toString());
+        formData.append('field', 'musicUrl');
 
-      // 3. Retourner la version à jour (tu peux ajouter ?populate=* si besoin)
-      // const finalRes = await api.get(`/musics/${documentId}?populate=*`);
-      // return finalRes.data?.data;
+        await api.post('/upload', formData);
+      }
+
+
+
       return updateRes.data?.data;
     } catch (err: any) {
       console.error(err);
